@@ -1,0 +1,307 @@
+ps1(){
+ 
+  echo "${@}" | grep -E '(-h|--help)' &>/dev/null
+  reqhelp=${?:-1};
+  if [[ ${reqhelp} -eq 0 ]]
+  then
+    echo "
+  ${FUNCNAME[0]} [-CDPT] [-a <any_str>] [-c <caret_str>] [-d] [-e <index>] [-lm] [-n <index>] [-p <string>] [-z]
+
+    -C          := print available carets
+    -D          := sets a variable I use elsewhere (BASH_DEBUG_PRECLEAR), you can probs ignore this ;)
+    -P          := print the available prompt stack
+    -T          := modify PROMPT_DIRTRIM; there for convenience
+    -a <string> := prefix arbitary string to the caret string
+    -c <string> := specficy a caret directly / manually
+    -d          := deac; deprecated (in the initial release ;D)
+    -e <index>  := choose a predefined caret by index (int)
+    -m          := set a minimal ascii prompt, namely: \"> \"
+    -n <index>  := choose a predefined prompt by index (int)
+    -p <string> := specficy a prompt directly / manually
+    -z          := print the prompts in a way that fzf can display
+    "
+    return 0
+  fi
+
+  # ps1) echo "[-C <prefix>] [-DPS] [-c <ind>] [-dl] [-p <str>] [-lm] [-n <ind>] [-z]"
+  local -a PS1_STACK
+  local preclear=1
+  local deac=1
+  local prompt=""
+  local caret=""
+  local manualPrompt=1
+  local manualCaret=1
+  local minps1=1
+  local forFzf=
+  local printStack=1
+  local printCarets=1
+  local psClear=0
+  local dirTrim=0
+
+  local stackInd=7 # make env var
+
+  # PS1 codes need "\[\]" wrappers because otherwise weird region sizes
+  psReset='\[\e[0m\]'
+  psPurple='\[\e[38;2;109;81;202m\]'
+  psBlue='\[\e[38;2;49;97;219m\]'
+  psYellow='\[\e[38;5;173m\]'
+  psOffWhite='\[\e[38;2;170;170;170m\]'
+
+  psMediumGray='\e[38;2;218;226;202m'
+  psGray='\[\e[38;2;122;122;122m\]'
+  psLightGray='\[\e[38;2;188;188;188m\]'
+  psReset='\[\e[0m\]'
+  psGrepTilde='\[\e[38;2;165;165;165m\]'
+
+  # allows use of env var PS1_COLOR_PRIMARY to set colors
+  psPrimary="\[${PS1_COLOR_PRIMARY:-\e[38;188;188;188m}\]"
+
+  local caretInd=0
+  local psCaretPre=""
+  local -a psCaret=()
+  psCaret+=("󰄾")
+  psCaret+=("󱢠")
+  psCaret+=("󰅬")
+  psCaret+=("")
+  psCaret+=("⌬")
+  psCaret+=("⏣")
+  psCaret+=("☠")
+  psCaret+=("❍")
+  psCaret+=("󰇂")
+  psCaret+=("󰈸")
+  psCaret+=("󰐂")
+  psCaret+=("󰈷")
+  psCaret+=("󰋙")
+  psCaret+=("󰊰")
+  psCaret+=("󰑓")
+  psCaret+=("󰑥")
+  psCaret+=("󰑧")
+  psCaret+=("󰖙")
+  psCaret+=("󰚌")
+  psCaret+=("󰚕")
+  psCaret+=("󰛥")
+  psCaret+=("󰞯")
+  psCaret+=("󰟪")
+  psCaret+=("󰣙")
+  psCaret+=("󰤀")
+  psCaret+=("󰩁")
+  psCaret+=("󰪉")
+  psCaret+=("󰩗")
+  psCaret+=("󰴔")
+  psCaret+=("󰫎")
+  psCaret+=("󰮑")
+  psCaret+=("󰮤")
+  psCaret+=("󰯉")
+  psCaret+=("󰯈")
+  psCaret+=("󰯋")
+  psCaret+=("󰷝")
+  psCaret+=("󰲼")
+  psCaret+=("󰲽")
+  psCaret+=("󰴗")
+  psCaret+=("󰴻")
+  psCaret+=("󰵿")
+  psCaret+=("󰸊")
+  psCaret+=("󰽖")
+  psCaret+=("󱤵")
+ 
+  # ps specfic stuff + colors
+  psTimeInBlue="${psBlue}\t"
+  psTimeInPurple="${psPurple}\t"
+  psPwdInYellow="${psYellow}\w"
+  psHostInOffWhite="${psOffWhite}\h"
+  psUserInOffWhite="${psOffWhite}\u"
+ 
+  local OPTIND=1
+  while getopts 'a:c:dDp:n:lPCSzmTe:' flag
+  do
+    case "${flag}" in
+      C) printCarets=0;;
+      D) preclear=0;;
+      P) printStack=0;;
+      T) dirTrim=1;;
+      a) psCaretPre="${OPTARG}";;
+      c) manualCaret=0; caret="${OPTARG}";;
+      d) deac=0;;
+      e) caretInd=${OPTARG};;
+      l) psClear=0;;
+      m) minps1=0; prompt="> ";;
+      n) stackInd=${OPTARG};;
+      p) manualPrompt=0; prompt="${OPTARG}";;
+      z) printStack=0; forFzf="-z";;
+      *) echo "arg error: ${OPTARG}"; return 0;;
+    esac
+  done
+ 
+  if [[ ${dirTrim} -eq 0 ]]
+  then
+    export PROMPT_DIRTRIM=2
+  else
+    export PROMPT_DIRTRIM=0
+  fi
+
+  if [[ ${manualCaret} -ne 0 ]]
+  then
+    if [[ ${caretInd} -lt 0 || ${caretInd} -ge ${#psCaret[@]} || "${caretInd}" == "R" ]]
+    then
+      if [[ "${caretInd}" == "R" ]]
+      then
+        caretInd=$(( ${RANDOM} % ${#psCaret[@]} ))
+      else
+        caretInd=0
+      fi
+    fi
+    caret="${psCaretPre}${psPrimary}${psCaret[${caretInd}]}${psReset} "
+  fi
+
+  PS1_STACK=()
+  PS1_STACK+=( "${psReset}" )
+  PS1_STACK+=( "${psReset}${psTimeInPurple}${psReset}" )
+  PS1_STACK+=( "${psReset}${psTimeInBlue}${psReset} ▶ ${psPwdInYellow}${psReset} ◀\n" )
+  PS1_STACK+=( "${psReset}⦤ ${psHostInOffWhite}${psReset} ⦥ ‹${psTimeInBlue}${psReset}› ◀ ${psPwdInYellow}${psReset} ▶\n" )
+  PS1_STACK+=( "${psReset}${psPrimary}┌ \w\n${psPrimary}╰" )
+  PS1_STACK+=( "${psReset}${psPrimary}╭󱢠 \w\n${psPrimary}╰${psReset}" )
+  PS1_STACK+=( "${psReset}${psPrimary}╭·\${TERM_ID}·\n${psPrimary}╰" )
+  PS1_STACK+=( "${psReset}${psPrimary}╭·\${TERM_ID}· \w\n${psPrimary}╰" )
+  PS1_STACK+=( "${psReset}${psPrimary}·${TERM_ID}·\n${psPrimary}" )
+  PS1_STACK+=( "${psReset}${psPrimary}·${TERM_ID}·" )
+  PS1_STACK+=( "${psReset}${psPrimary}󰄮" )
+  PS1_STACK+=( "${psReset}${psPrimary}·\${TERM_ID}· \W " )
+  # PS1_STACK+=( "${psReset}󱤵" )
+
+  local n=0
+  pcarets(){
+    for c in "${psCaret[@]}"
+    do
+      echo "$((n++)) ${c}"
+    done
+  }
+
+  pstack(){
+    local forFzf=1
+    local OPTIND=1 OPTARG="" OPTERR=0
+    while getopts 'z' flag
+    do
+      case "${flag}" in
+        z)  forFzf=0;;
+      esac
+    done
+
+    {
+      local i=0
+      for p in "${PS1_STACK[@]}"
+      do
+        p="${p}${caret}"
+        if [[ ${forFzf} -eq 0 ]]
+        then
+          echo "$((i++)) ${p}"
+        else
+          echo -e "${psGrepTilde}$((i++)))${psReset}\n${p@P}${psPrimary}shell --example${psReset}\n"
+        fi
+      done
+    } | sed -e 's/\\\[//g' -e 's/\\\]//g'
+
+    return 0
+  }
+
+  if [[ ${printStack} -eq 0 ]]
+  then
+    pstack ${forFzf}
+    return 0
+  fi
+
+  if [[ ${printCarets} -eq 0 ]]
+  then
+    pcarets
+    return 0
+  fi 
+
+
+  if [[ ${minps1} -ne 0 && ${manualPrompt} -ne 0 ]]
+  then
+
+    if [[ ${stackInd} -lt 0 || ${stackInd} -gt ${#PS1_STACK[@]} ]]
+    then
+      stackInd=0
+      echo "PS1_STACK range: 0-$(( ${#PS1_STACK[@]} -1 ))" >&2
+      echo "stackInd set to 0" >&2
+    fi
+
+    prompt="${PS1_STACK[${stackInd}]}${caret}"
+
+  fi
+
+  if [[ ${deac} -eq 0 ]]
+  then
+      # reset to old if poss; or noop
+      # perhaps create: ~/.config/bash/ps1?
+      export PS1="${OPS1:-${PS1}}"
+
+      if [[ ${preclear} -eq 0 ]]
+      then
+        export BASH_DEBUG_PRECLEAR=0
+      else
+        export BASH_DEBUG_PRECLEAR=1
+      fi
+
+  else
+      # save Old PS1, set to a minimal string
+      export OPS1="${PS1:-;)}"
+      if [[ ${preclear} -eq 0 ]]
+      then
+        export BASH_DEBUG_PRECLEAR=0
+      else
+        export BASH_DEBUG_PRECLEAR=1
+      fi
+  fi
+
+  export PS1="${prompt}"
+
+}
+
+_ps1(){
+
+  local cur prev words cword;
+  _init_completion || return;
+
+  local -a crep=()
+# echo "prev:·${prev}·|cur:·${cur}·|cword:·${cword}·|Words:·${words[@]:0:${cword}}·|words:·${words[@]}·" >> /tmp/foo;
+
+  if [[ "${words[0]}" == "ps1" ]]
+  then
+    case "${prev}" in
+      "+([0-9])")
+        pind=$(( ${cword} - 2 ))
+        if [[ "${words[${pind}]}" == "-n" ]]
+        then
+          case "${prev}" in
+            8) COMPREPLY=( "-e 12" );;
+            10) COMPREPLY=( "-e 2" );;
+            *) COMPREPLY=( -e );;
+          esac
+        fi;;
+      ps1) wlist=$( echo "-n -e -c -C -D -P -S -d -l -p -l -m -z" );
+           COMPREPLY=($(compgen -W "${wlist}" -- "${cur}"));;
+
+       -n) pind=$( ps1 -P -z | \
+                   fzf --cycle --tac \
+                   --nth=2.. --with-nth=1 --accept-nth=1 \
+                   --preview 'x=$( echo {} | cut -d" " -f 2- ); echo -e "${x@P}"' \
+                   --preview-window='right,89%'
+                 );
+           COMPREPLY=( "${pind}" );;
+
+       -e) cind=$( ps1 -C | \
+                   fzf --cycle --tac \
+                   --accept-nth=1 \
+                 );
+           COMPREPLY=( ${cind} );;
+      # -C) if [[ -z "${cur}" ]]; then {  echo -n '"<caret prefix string>"' >&2; tput cub 23; sleep 0.4; tput el ;};
+            # COMPREPLY=( '·' );;
+    esac
+  fi
+
+}
+complete -o nosort -F _ps1 ps1
+
+# bpc(){ [[ ${BASH_DEBUG_PRECLEAR} -eq 0 ]] && tput cup 0 0 el ;}
+# PROMPT_COMMAND+=( bpc )
