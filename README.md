@@ -72,7 +72,9 @@ PS1_COLOR_PRIMARY="$(
   done | fzf --ansi -s --cycle --reverse \
        | pastel format ansi-24bit-escapecode -)" \
          ps1 -n7 -eR
+```
 
+```bash
 PS1_COLOR_PRIMARY="$(
   for x in $( pastel random -n 1000 | sort -V )
   do 
