@@ -40,6 +40,10 @@ ps1(){
 
   local stackInd=7 # make env var
 
+  local caretInd=0
+  local psCaretPre=""
+  local -a psCaret=()
+
   # PS1 codes need "\[\]" wrappers because otherwise weird region sizes
   psReset='\[\e[0m\]'
   psPurple='\[\e[38;2;109;81;202m\]'
@@ -56,9 +60,6 @@ ps1(){
   # allows use of env var PS1_COLOR_PRIMARY to set colors
   psPrimary="\[${PS1_COLOR_PRIMARY:-\e[38;188;188;188m}\]"
 
-  local caretInd=0
-  local psCaretPre=""
-  local -a psCaret=()
   psCaret+=("󰄾")
   psCaret+=("󱢠")
   psCaret+=("󰅬")
