@@ -61,3 +61,23 @@ Or, if you're feeling "ADHD", and have pastel installed, you can go:
 ```bash
 export PROMPT_COMMAND+=( 'PS1_COLOR_PRIMARY="$(pastel random -n1 | pastel format ansi-24bit-escapecode)" ps1 -n7 -eR' )
 ```
+
+more pastel + fzf related examples:
+
+```bash
+PS1_COLOR_PRIMARY="$(
+  for x in $( pastel list | sort )
+  do 
+    echo -e "$( pastel format ansi-24bit-escapecode ${x} )${x}"
+  done | fzf --ansi -s --cycle --reverse \
+       | pastel format ansi-24bit-escapecode -)" \
+         ps1 -n7 -eR
+
+PS1_COLOR_PRIMARY="$(
+  for x in $( pastel random -n 1000 | sort -V )
+  do 
+    echo -e "$( pastel format ansi-24bit-escapecode ${x} )${x}"
+  done | fzf --ansi -s --cycle --reverse \
+       | pastel format ansi-24bit-escapecode -)" \
+         ps1
+```
