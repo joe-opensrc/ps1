@@ -16,8 +16,8 @@ source ~/apps/bash/ps1/dotfiles/bashrc_ps1
 ```
 
 #### DEPENDENCIES
-  bash
-  you'll need a true-color $TERM + Symbols Nerd Font (or similar; untested)
+  bash \
+  You'll need a true-color $TERM + Symbols Nerd Font (or similar; untested)
 
 #### USAGE
 
@@ -31,8 +31,33 @@ ps1 -n <int> -e <int>
 
 There is autocompletion which uses fzf to present options with a preview
 
-#### ENV Vars
+#### ENV VARS
 
-you can use: PS1_COLOR_PRIMARY to set a color for the prompt
-Currently expects a 24-bit ansi (escaped) color code:
+You can use: PS1_COLOR_PRIMARY to set a color for the prompt \
+Currently expects a 24-bit ansi-escaped color code: \
 e.g., "\e[38;2;r;g;bm"
+
+Bonus function:
+
+```bash
+hex_to_ansi () {
+  rgb=${1:1}
+  argb=$( for cpi in $(seq 0 2 $(( ${#rgb} - 1 ))); do printf '%d;' "0x${rgb:${cpi}:2}"; done);
+  argb="${argb%;}"
+  echo "\033[38;2;${argb}m"
+}
+```
+
+So you can go:
+
+```bash
+export PS1_COLOR_PRIMARY="$( hex_to_ansi '#476c3d' )"
+# which is the same as
+export PS1_COLOR_PRIMARY="\033[38;2;71;108;61m"
+```
+
+Or, if you're feeling "ADHD", and have pastel installed, you can go:
+
+```bash
+export PROMPT_COMMAND+=( 'PS1_COLOR_PRIMARY="$(pastel random -n1 | pastel format ansi-24bit-escapecode)" ps1 -n7 -eR' )
+```
