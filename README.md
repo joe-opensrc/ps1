@@ -1,6 +1,6 @@
-### PS1 -- set your bash terminal with ease
+### PS1 -- set your bash terminal prompt with ease
 
-A Hideously Functional⁽™⁾ script suite (bash only).
+A Hideously Functional⁽™⁾ script suite.
 
 #### INSTALL
 
