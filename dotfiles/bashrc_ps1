@@ -60,6 +60,7 @@ ps1(){
   # allows use of env var PS1_COLOR_PRIMARY to set colors
   psPrimary="\[${PS1_COLOR_PRIMARY:-\e[38;188;188;188m}\]"
 
+  # todo: separate out into separate file...
   psCaret+=("󰄾")
   psCaret+=("󱢠")
   psCaret+=("󰅬")
