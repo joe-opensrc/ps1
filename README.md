@@ -22,11 +22,28 @@ source ~/apps/bash/ps1/dotfiles/bashrc_ps1
 #### USAGE
 
 ```bash
-# to get usage:
-ps1 --help 
-
 # generally: 
-ps1 -n <int> -e <int>
+  ps1 -n <int> -e <int>
+
+# to get usage:
+> ps1 --help 
+
+  ps1 [-CDPT] [-a <any_str>] [-c <caret_str>] [-d] [-e <index>] [-lm] [-n <index>] [-p <string>] [-z]
+
+    -C          := print available carets
+    -D          := sets a variable I use elsewhere (BASH_DEBUG_PRECLEAR), you can probs ignore this ;)
+    -P          := print the available prompt stack
+    -T          := modify PROMPT_DIRTRIM; there for convenience
+    -a <string> := prefix arbitary string to the caret string
+    -c <string> := specficy a caret directly / manually
+    -d          := deac; deprecated (in the initial release ;D)
+    -e <index>  := choose a predefined caret by index (int)
+    -m          := set a minimal ascii prompt, namely: "> "
+    -n <index>  := choose a predefined prompt by index (int)
+    -p <string> := specficy a prompt directly / manually
+    -z          := print the prompts in a way that fzf can display
+    
+
 ```
 
 There is autocompletion which uses fzf to present options with a preview
