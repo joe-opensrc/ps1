@@ -1,0 +1,15 @@
+
+local -a PS1_STACK
+PS1_STACK+=( "${psReset}" )
+PS1_STACK+=( "${psReset}${psTimeInPurple}${psReset}" )
+PS1_STACK+=( "${psReset}${psTimeInBlue}${psReset} ▶ ${psPwdInYellow}${psReset} ◀\n" )
+PS1_STACK+=( "${psReset}⦤ ${psHostInOffWhite}${psReset} ⦥ ‹${psTimeInBlue}${psReset}› ◀ ${psPwdInYellow}${psReset} ▶\n" )
+PS1_STACK+=( "${psReset}${psPrimary}┌ \w\n${psPrimary}╰" )
+PS1_STACK+=( "${psReset}${psPrimary}╭󱢠 \w\n${psPrimary}╰${psReset}" )
+PS1_STACK+=( "${psReset}${psPrimary}╭·\${TERM_ID}·\n${psPrimary}╰" )
+PS1_STACK+=( "${psReset}${psPrimary}╭·\${TERM_ID}· \w\n${psPrimary}╰" )
+PS1_STACK+=( "${psReset}${psPrimary}·${TERM_ID}·\n${psPrimary}" )
+PS1_STACK+=( "${psReset}${psPrimary}·${TERM_ID}·" )
+PS1_STACK+=( "${psReset}${psPrimary}󰄮" )
+PS1_STACK+=( "${psReset}${psPrimary}·\${TERM_ID}· \W " )
+# PS1_STACK+=( "${psReset}󱤵" )
