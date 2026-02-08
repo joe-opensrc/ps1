@@ -23,6 +23,9 @@ ps1(){
     return 0
   fi
 
+  # get the src / install location
+  local spath="$( dirname $( readlink ${BASH_SOURCE[0]} ) )"
+
   # ps1) echo "[-C <prefix>] [-DPS] [-c <ind>] [-dl] [-p <str>] [-lm] [-n <ind>] [-z]"
   local -a PS1_STACK
   local preclear=1
@@ -61,51 +64,9 @@ ps1(){
   psPrimary="\[${PS1_COLOR_PRIMARY:-\e[38;188;188;188m}\]"
 
   # todo: separate out into separate file...
-  psCaret+=("󰄾")
-  psCaret+=("󱢠")
-  psCaret+=("󰅬")
-  psCaret+=("")
-  psCaret+=("⌬")
-  psCaret+=("⏣")
-  psCaret+=("☠")
-  psCaret+=("❍")
-  psCaret+=("󰇂")
-  psCaret+=("󰈸")
-  psCaret+=("󰐂")
-  psCaret+=("󰈷")
-  psCaret+=("󰋙")
-  psCaret+=("󰊰")
-  psCaret+=("󰑓")
-  psCaret+=("󰑥")
-  psCaret+=("󰑧")
-  psCaret+=("󰖙")
-  psCaret+=("󰚌")
-  psCaret+=("󰚕")
-  psCaret+=("󰛥")
-  psCaret+=("󰞯")
-  psCaret+=("󰟪")
-  psCaret+=("󰣙")
-  psCaret+=("󰤀")
-  psCaret+=("󰩁")
-  psCaret+=("󰪉")
-  psCaret+=("󰩗")
-  psCaret+=("󰴔")
-  psCaret+=("󰫎")
-  psCaret+=("󰮑")
-  psCaret+=("󰮤")
-  psCaret+=("󰯉")
-  psCaret+=("󰯈")
-  psCaret+=("󰯋")
-  psCaret+=("󰷝")
-  psCaret+=("󰲼")
-  psCaret+=("󰲽")
-  psCaret+=("󰴗")
-  psCaret+=("󰴻")
-  psCaret+=("󰵿")
-  psCaret+=("󰸊")
-  psCaret+=("󰽖")
-  psCaret+=("󱤵")
- 
+  source "${spath}/ps1_carets"
+
+  # psCaret+=("󰄾"
   # ps specfic stuff + colors
   psTimeInBlue="${psBlue}\t"
   psTimeInPurple="${psPurple}\t"
@@ -155,21 +116,8 @@ ps1(){
     caret="${psCaretPre}${psPrimary}${psCaret[${caretInd}]}${psReset} "
   fi
 
-  PS1_STACK=()
-  PS1_STACK+=( "${psReset}" )
-  PS1_STACK+=( "${psReset}${psTimeInPurple}${psReset}" )
-  PS1_STACK+=( "${psReset}${psTimeInBlue}${psReset} ▶ ${psPwdInYellow}${psReset} ◀\n" )
-  PS1_STACK+=( "${psReset}⦤ ${psHostInOffWhite}${psReset} ⦥ ‹${psTimeInBlue}${psReset}› ◀ ${psPwdInYellow}${psReset} ▶\n" )
-  PS1_STACK+=( "${psReset}${psPrimary}┌ \w\n${psPrimary}╰" )
-  PS1_STACK+=( "${psReset}${psPrimary}╭󱢠 \w\n${psPrimary}╰${psReset}" )
-  PS1_STACK+=( "${psReset}${psPrimary}╭·\${TERM_ID}·\n${psPrimary}╰" )
-  PS1_STACK+=( "${psReset}${psPrimary}╭·\${TERM_ID}· \w\n${psPrimary}╰" )
-  PS1_STACK+=( "${psReset}${psPrimary}·${TERM_ID}·\n${psPrimary}" )
-  PS1_STACK+=( "${psReset}${psPrimary}·${TERM_ID}·" )
-  PS1_STACK+=( "${psReset}${psPrimary}󰄮" )
-  PS1_STACK+=( "${psReset}${psPrimary}·\${TERM_ID}· \W " )
-  # PS1_STACK+=( "${psReset}󱤵" )
 
+  source "${spath}/ps1_prompts"
   local n=0
   pcarets(){
     for c in "${psCaret[@]}"
